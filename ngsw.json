@@ -1,0 +1,91 @@
+{
+  "configVersion": 1,
+  "timestamp": 1783768398302,
+  "index": "/fitlog/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/fitlog/chunk-3E7DHEB6.js",
+        "/fitlog/chunk-57BUAIQJ.js",
+        "/fitlog/chunk-5LOGQ5XE.js",
+        "/fitlog/chunk-5OAUUFH7.js",
+        "/fitlog/chunk-5YP22PFA.js",
+        "/fitlog/chunk-7FAQYZRT.js",
+        "/fitlog/chunk-CJTBKBVL.js",
+        "/fitlog/chunk-H6AR5SLF.js",
+        "/fitlog/chunk-JNQX5HE4.js",
+        "/fitlog/chunk-MO7V3JZB.js",
+        "/fitlog/chunk-WZ3B4YTF.js",
+        "/fitlog/favicon.ico",
+        "/fitlog/index.html",
+        "/fitlog/main-F3BNPW5P.js",
+        "/fitlog/manifest.webmanifest",
+        "/fitlog/polyfills-5CFQRCPP.js",
+        "/fitlog/styles-YZ35YPEE.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/fitlog/icons/icon-180.png",
+        "/fitlog/icons/icon-192.png",
+        "/fitlog/icons/icon-512.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/fitlog/chunk-3E7DHEB6.js": "94b7938b3cbc6f3fb05f55a51f8799db5cfd13a3",
+    "/fitlog/chunk-57BUAIQJ.js": "f065640dc79a4c91ec23c4832d15a7ad5d65faa4",
+    "/fitlog/chunk-5LOGQ5XE.js": "3198a9f071bd5e422ecaaf549dbe7aaf5f2126d4",
+    "/fitlog/chunk-5OAUUFH7.js": "c59ebae2d8d379a2b848f292d08fa003200002e2",
+    "/fitlog/chunk-5YP22PFA.js": "73d5855c8a427ba166985218e2d8a51fb7376458",
+    "/fitlog/chunk-7FAQYZRT.js": "c6ca1eb914b35c578f866f849931fdab3e1df8eb",
+    "/fitlog/chunk-CJTBKBVL.js": "307ae44ee439451f94d9e2cc4548b473ff0c091a",
+    "/fitlog/chunk-H6AR5SLF.js": "1e73ef05c54c7a41ef6bcefcd29a2b6c1fba9738",
+    "/fitlog/chunk-JNQX5HE4.js": "95c5fa2f97e2922083cc987cd040779d4ef4914a",
+    "/fitlog/chunk-MO7V3JZB.js": "83d02d95f970efaa70256161b0e0c7bd27343adf",
+    "/fitlog/chunk-WZ3B4YTF.js": "a0321f7c5081d55d9a9a423faac778b6f3f75d14",
+    "/fitlog/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "/fitlog/icons/icon-180.png": "90005099da4a10ea068cc4d623bec0323378ddeb",
+    "/fitlog/icons/icon-192.png": "e7766cbdbbd91f5ea3672c36c7d6894785ed50e9",
+    "/fitlog/icons/icon-512.png": "9a564be31209e2e3e1e5c2b680be7a588b1b25e8",
+    "/fitlog/index.html": "d3eb7157b974ff2b4c3e4cd09744394f90f9380c",
+    "/fitlog/main-F3BNPW5P.js": "e24589e8162278dfd823b31adf559c4c65fc614c",
+    "/fitlog/manifest.webmanifest": "f0aef8cb396670d8a3bcc16005de7e75ae5aba5a",
+    "/fitlog/polyfills-5CFQRCPP.js": "f2241e9a25858f895ce299d15f6f22e849e2fd72",
+    "/fitlog/styles-YZ35YPEE.css": "bc73719632d486e7cb21881ab9926de1dfcfce98"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
