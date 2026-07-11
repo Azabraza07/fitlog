@@ -1,0 +1,391 @@
+.head {
+  padding: 12px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- План на стартовом экране ---------- */
+
+.plan {
+  margin-bottom: 14px;
+}
+
+.plan-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+
+  & + .plan-row {
+    border-top: 1px solid var(--line);
+  }
+}
+
+.plan-index {
+  width: 18px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acid);
+}
+
+.plan-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.plan-dose {
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.alt-start {
+  margin-top: 8px;
+}
+
+.warmup {
+  margin-top: 26px;
+
+  ul {
+    margin: 10px 0 0;
+    padding-left: 18px;
+    color: var(--dim);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+}
+
+/* ================= Пошаговый режим ================= */
+
+.step-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 12px;
+}
+
+.step-list-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  cursor: pointer;
+
+  .t-num {
+    font-family: var(--tui-font-heading);
+    font-size: 16px;
+    font-weight: 800;
+  }
+}
+
+.live {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+}
+
+.live-sep {
+  color: var(--faint);
+}
+
+.pain-btn {
+  appearance: none;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--faint);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  cursor: pointer;
+
+  &.is-on {
+    border-color: var(--coral);
+    color: var(--coral);
+    background: color-mix(in srgb, var(--coral) 12%, transparent);
+  }
+}
+
+.step-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.step-progress-fill {
+  height: 100%;
+  background: var(--acid);
+  transition: width 0.25s ease;
+}
+
+/* ---------- Карточка текущего упражнения ---------- */
+
+.focus {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+}
+
+.focus-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.focus-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+
+  b {
+    font-family: var(--tui-font-heading);
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+}
+
+.focus-note {
+  margin: 10px 0 0;
+}
+
+.sug-up {
+  color: var(--acid);
+  font-weight: 700;
+}
+
+/* ---------- Чипы подходов ---------- */
+
+.set-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.chip {
+  appearance: none;
+  min-width: 44px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--dim);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  &.is-current {
+    border-color: var(--acid);
+    color: var(--ink);
+  }
+
+  &.is-done {
+    background: color-mix(in srgb, var(--acid) 16%, transparent);
+    border-color: transparent;
+    color: var(--acid);
+  }
+}
+
+.chip-add {
+  min-width: 40px;
+  font-size: 18px;
+}
+
+.pr {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--acid-ink);
+  background: var(--acid);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+/* ---------- Степперы ---------- */
+
+.steppers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stepper-row {
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  gap: 10px;
+  align-items: center;
+}
+
+.step-btn {
+  appearance: none;
+  height: 60px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:active {
+    background: var(--line);
+  }
+}
+
+.step-val {
+  font-family: var(--tui-font-heading);
+  font-size: 44px;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.complete-btn {
+  font-size: 17px;
+  padding: 18px;
+}
+
+.ex-finished {
+  margin: 18px 0 4px;
+  text-align: center;
+
+  p {
+    margin: 0 0 12px;
+  }
+}
+
+.focus-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+
+  .tile-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .grow {
+    flex: 1;
+  }
+}
+
+.all-done {
+  text-align: center;
+  color: var(--acid);
+  margin: 16px 0 0;
+}
+
+.finish-btn {
+  margin-top: 14px;
+}
+
+.cancel-btn {
+  margin-top: 8px;
+  padding: 12px;
+}
+
+/* ---------- Шторки ---------- */
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tips {
+  margin: 10px 0 18px;
+  padding-left: 18px;
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.yt {
+  display: flex;
+  justify-content: center;
+  text-decoration: none;
+  margin-bottom: 8px;
+}
+
+.alts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.alt {
+  appearance: none;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--line);
+  padding: 13px 2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+.alt-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-size: 15px;
+  }
+}
+
+.mono-dim {
+  opacity: 0.4;
+}
+
+.now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acid);
+}

@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.shell {
+  max-width: 560px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: calc(14px + env(safe-area-inset-top)) 20px 10px;
+}
+
+.wordmark {
+  font-family: var(--tui-font-heading);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+
+  em {
+    font-style: normal;
+    color: var(--acid);
+  }
+}
+
+.content {
+  flex: 1;
+  padding: 4px 20px calc(96px + env(safe-area-inset-bottom));
+}
+
+/* ---------- Нижняя навигация: текст + индексы, без иконок ---------- */
+
+.dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--line);
+}
+
+.dock-item {
+  flex: 1;
+  max-width: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--dim);
+}
+
+.dock-index {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+}
+
+.dock-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dock-item.is-active {
+  color: var(--ink);
+
+  .dock-index {
+    color: var(--acid);
+  }
+
+  .dock-label {
+    box-shadow: 0 2px 0 var(--acid);
+  }
+}

@@ -1,0 +1,161 @@
+.head {
+  padding: 12px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  small {
+    font-size: 18px;
+    color: var(--dim);
+    font-weight: 600;
+  }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-v {
+  font-family: var(--tui-font-heading);
+  font-size: 24px;
+  font-weight: 800;
+
+  &.is-acid {
+    color: var(--acid);
+  }
+}
+
+.block {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.block-note {
+  margin: 8px 0 0;
+}
+
+.weight-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin: 14px 0 4px;
+}
+
+.weight-field {
+  text-align: left;
+  font-size: 16px;
+}
+
+.chart {
+  height: 180px;
+  margin-top: 18px;
+
+  /* линия графика берёт currentColor */
+  tui-line-chart {
+    color: var(--acid);
+  }
+}
+
+.chart-empty {
+  margin: 16px 0 0;
+}
+
+.last-line {
+  margin: 12px 0 0;
+}
+
+.ex-select {
+  width: 100%;
+  margin-top: 12px;
+  appearance: none;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  padding: 12px 14px;
+}
+
+.rest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 16px 0 14px;
+}
+
+.rest-btns {
+  display: flex;
+  gap: 6px;
+
+  .tile-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
+
+.backup-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+
+  .tile-btn {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 14px;
+    text-align: center;
+    justify-content: center;
+    display: inline-flex;
+  }
+}
+
+.program {
+  margin-top: 16px;
+}
+
+.prog-title {
+  display: block;
+  margin: 16px 0 6px;
+}
+
+.prog-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.prog-i {
+  width: 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--acid);
+}
+
+.prog-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.warmup-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}

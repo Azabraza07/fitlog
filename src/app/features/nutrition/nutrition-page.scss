@@ -1,0 +1,213 @@
+.head {
+  padding: 12px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  small {
+    font-size: 18px;
+    color: var(--dim);
+    font-weight: 600;
+  }
+}
+
+.tier-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.tier-route {
+  font-family: var(--tui-font-heading);
+  font-weight: 800;
+  color: var(--acid);
+}
+
+.macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.macro {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.macro-v {
+  font-family: var(--tui-font-heading);
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.recalc-note {
+  margin: 12px 2px 16px;
+}
+
+.block {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.tier-table {
+  margin: 14px 0 12px;
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.7fr 0.7fr 0.7fr;
+  gap: 6px;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+  font-size: 14px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.is-current {
+    color: var(--acid);
+  }
+}
+
+.tier-row--head {
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---------- Дневник ---------- */
+
+.diary {
+  margin: 14px 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diary-row {
+  display: grid;
+  grid-template-columns: 76px 1fr 92px;
+  gap: 12px;
+  align-items: center;
+}
+
+.diary-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.diary-fill {
+  height: 100%;
+  background: var(--acid);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+
+  &.is-over {
+    background: var(--coral);
+  }
+}
+
+.diary-nums {
+  text-align: right;
+  color: var(--dim);
+
+  &.is-over {
+    color: var(--coral);
+  }
+}
+
+.meal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+
+  &:first-of-type {
+    margin-top: 10px;
+  }
+}
+
+.meal-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-size: 14px;
+  }
+}
+
+.meal-del {
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dim);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.meal-form {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.meal-name {
+  text-align: left;
+  font-size: 15px;
+  width: 100%;
+}
+
+.meal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.meal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.meal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+
+  .tile-btn {
+    flex: 1;
+    justify-content: center;
+    display: inline-flex;
+  }
+}
+
+.add-meal {
+  margin-top: 12px;
+}
+
+.rules {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.7;
+
+  li + li {
+    margin-top: 8px;
+  }
+}

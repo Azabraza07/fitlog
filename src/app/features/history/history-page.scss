@@ -1,0 +1,96 @@
+.head {
+  padding: 12px 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cal-wrap {
+  padding: 10px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+
+  tui-calendar {
+    background: transparent;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 32px 12px;
+}
+
+.entry {
+  margin-bottom: 10px;
+}
+
+.entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.entry-title {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  b {
+    font-size: 15px;
+  }
+}
+
+.chev {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.entry-body {
+  padding: 12px 16px 16px;
+}
+
+.entry-ex {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.mono--s {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+
+.entry-ex-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-size: 14px;
+  }
+}
+
+.tile-btn.is-danger {
+  margin-top: 12px;
+  padding: 9px 14px;
+  font-size: 14px;
+}
+
+.pain-flag {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral);
+  border: 1px solid var(--coral);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}

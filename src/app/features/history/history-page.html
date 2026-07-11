@@ -1,0 +1,62 @@
+<section class="head">
+  <span class="t-label">02 · История</span>
+  <h1 class="t-display">
+    {{ store.workouts().length }}
+    {{ plural(store.workouts().length, ['тренировка', 'тренировки', 'тренировок']) }}
+  </h1>
+  <p class="t-dim t-small">в этом месяце — {{ monthCount() }}</p>
+</section>
+
+<div class="panel cal-wrap">
+  <tui-calendar [value]="null" [markerHandler]="markerHandler" />
+</div>
+
+@if (ordered().length === 0) {
+  <p class="t-dim empty">Пока пусто. Заверши первую тренировку — она появится здесь.</p>
+}
+
+@for (w of ordered(); track w.id) {
+  <article class="panel entry">
+    <header class="entry-head" (click)="toggle(w.id)">
+      <div class="entry-title">
+        <b>
+          {{ PROGRAMS[w.type].name }}
+          @if (hasPain(w)) {
+            <em class="pain-flag">боль</em>
+          }
+        </b>
+        <span class="t-small t-dim t-num">
+          {{ fmt(w.date) }} · {{ w.items.length }}
+          {{ plural(w.items.length, ['упражнение', 'упражнения', 'упражнений']) }}
+          · {{ tonnage(w) }} кг
+          @if (duration(w); as d) {
+            · {{ d }}
+          }
+        </span>
+      </div>
+      <span class="chev t-dim">{{ expandedId() === w.id ? '−' : '+' }}</span>
+    </header>
+
+    @if (expandedId() === w.id) {
+      <div class="entry-body hairline-top">
+        @for (item of w.items; track $index) {
+          <div class="entry-ex">
+            <span class="mono mono--s">{{ monogram(exercise(item.ex).name) }}</span>
+            <div class="entry-ex-info">
+              <b>
+                {{ exercise(item.ex).name }}
+                @if (item.pain) {
+                  <em class="pain-flag">боль</em>
+                }
+              </b>
+              <span class="t-small t-dim t-num">{{ setsLine(item.sets) }}</span>
+            </div>
+          </div>
+        }
+        <button type="button" class="tile-btn is-danger" (click)="remove(w.id)">
+          Удалить тренировку
+        </button>
+      </div>
+    }
+  </article>
+}

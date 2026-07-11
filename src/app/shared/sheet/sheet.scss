@@ -1,0 +1,46 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: block;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 60%);
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 82dvh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-radius: 14px 14px 0 0;
+  padding: 10px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: rise 0.22s ease;
+}
+
+.grip {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  margin: 4px auto 14px;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(48px);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}

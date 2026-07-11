@@ -1,0 +1,162 @@
+<section class="head">
+  <span class="t-label">03 · Прогресс</span>
+  <h1 class="t-display">
+    {{ store.currentWeight() }} <small>кг</small>
+  </h1>
+  <p class="t-dim t-small">цель {{ PROFILE.goalWeight }} кг · осталось {{ toGoal() }} кг</p>
+</section>
+
+<div class="stats">
+  <div class="panel stat">
+    <span class="stat-v t-num" [class.is-acid]="lost() > 0">
+      {{ lost() > 0 ? '−' + lost() : lost() }}
+    </span>
+    <span class="t-label">кг с начала</span>
+  </div>
+  <div class="panel stat">
+    <span class="stat-v t-num">{{ store.workouts().length }}</span>
+    <span class="t-label">тренировок</span>
+  </div>
+  <div class="panel stat">
+    <span class="stat-v t-num">{{ store.weekStreak() }}</span>
+    <span class="t-label">недель подряд</span>
+  </div>
+</div>
+
+<!-- ---------- Вес тела ---------- -->
+<section class="panel block">
+  <span class="t-label">Вес тела</span>
+
+  <div class="weight-form">
+    <input
+      class="u-input weight-field"
+      type="number"
+      inputmode="decimal"
+      step="0.1"
+      placeholder="Вес сегодня, кг"
+      [value]="weightInput()"
+      (input)="onWeightInput($event)"
+      (keyup.enter)="addWeight()"
+    />
+    <button type="button" class="tile-btn is-acid" (click)="addWeight()">Записать</button>
+  </div>
+
+  @if (weightChart(); as chart) {
+    <tui-axes
+      class="chart"
+      [axisXLabels]="chart.labelsX"
+      [axisYLabels]="chart.labelsY"
+      [horizontalLines]="3"
+    >
+      <tui-line-chart
+        [value]="chart.points"
+        [x]="chart.x"
+        [y]="chart.y"
+        [width]="chart.width"
+        [height]="chart.height"
+        [smoothingFactor]="0"
+      />
+    </tui-axes>
+  } @else {
+    <p class="t-small t-dim chart-empty">
+      Записывай вес 2–3 раза в неделю утром натощак — после двух записей появится график.
+    </p>
+  }
+
+  @if (lastWeightLine(); as line) {
+    <p class="t-small t-dim last-line">Последняя запись · {{ line }}</p>
+  }
+</section>
+
+<!-- ---------- Рабочие веса ---------- -->
+<section class="panel block">
+  <span class="t-label">Рабочие веса</span>
+
+  @if (exOptions().length > 0) {
+    <select class="ex-select" [value]="currentEx()" (change)="onExChange($event)">
+      @for (id of exOptions(); track id) {
+        <option [value]="id">{{ exercise(id).name }}</option>
+      }
+    </select>
+
+    @if (exChart(); as chart) {
+      <tui-axes
+        class="chart"
+        [axisXLabels]="chart.labelsX"
+        [axisYLabels]="chart.labelsY"
+        [horizontalLines]="3"
+      >
+        <tui-line-chart
+          [value]="chart.points"
+          [x]="chart.x"
+          [y]="chart.y"
+          [width]="chart.width"
+          [height]="chart.height"
+          [smoothingFactor]="0"
+        />
+      </tui-axes>
+    } @else {
+      <p class="t-small t-dim chart-empty">Нужно минимум две тренировки с этим упражнением.</p>
+    }
+  } @else {
+    <p class="t-small t-dim chart-empty">Появится после первых тренировок.</p>
+  }
+</section>
+
+<!-- ---------- Программа и настройки ---------- -->
+<section class="panel block">
+  <span class="t-label">Моя программа</span>
+  <p class="t-small t-dim block-note">Full Body 3×/нед · ротация A/B · +2,5 кг, когда все подходы чистые и без боли</p>
+
+  <div class="rest-row">
+    <span class="t-small">Отдых между подходами</span>
+    <div class="rest-btns">
+      @for (s of restOptions; track s) {
+        <button
+          type="button"
+          class="tile-btn"
+          [class.is-acid]="store.restSeconds() === s"
+          [class.is-quiet]="store.restSeconds() !== s"
+          (click)="store.setRest(s)"
+        >
+          {{ s }}с
+        </button>
+      }
+    </div>
+  </div>
+
+  <button type="button" class="tile-btn is-quiet is-wide" (click)="programOpen.set(!programOpen())">
+    {{ programOpen() ? 'Скрыть программу A/B' : 'Показать программу A/B' }}
+  </button>
+
+  <div class="backup-row">
+    <button type="button" class="tile-btn is-quiet" (click)="exportData()">
+      Экспорт данных
+    </button>
+    <label class="tile-btn is-quiet import-label">
+      Импорт
+      <input type="file" accept="application/json,.json" hidden (change)="importData($event)" />
+    </label>
+  </div>
+
+  @if (programOpen()) {
+    <div class="program">
+      @for (type of programTypes; track type) {
+        <span class="t-label prog-title">{{ PROGRAMS[type].name }}</span>
+        @for (item of PROGRAMS[type].items; track item.ex; let i = $index) {
+          <div class="prog-row">
+            <span class="t-num prog-i">{{ i + 1 }}</span>
+            <span class="prog-name">{{ exercise(item.ex).name }}</span>
+            <span class="t-num t-small t-dim">{{ item.sets }}×{{ item.reps }}</span>
+          </div>
+        }
+      }
+      <span class="t-label prog-title">Разминка</span>
+      <ul class="warmup-list t-small t-dim">
+        @for (step of WARMUP; track step) {
+          <li>{{ step }}</li>
+        }
+      </ul>
+    </div>
+  }
+</section>

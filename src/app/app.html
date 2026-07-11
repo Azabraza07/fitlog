@@ -1,0 +1,25 @@
+<tui-root tuiTheme="dark">
+  <div class="shell">
+    <header class="masthead">
+      <span class="wordmark">FIT<em>LOG</em></span>
+      <span class="t-label">{{ today }}</span>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+
+    <nav class="dock" aria-label="Основная навигация">
+      @for (item of nav; track item.path) {
+        <a class="dock-item" [routerLink]="item.path" routerLinkActive="is-active">
+          <span class="dock-index t-num">{{ item.index }}</span>
+          <span class="dock-label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+  </div>
+
+  @if (timer.running()) {
+    <app-rest-timer />
+  }
+</tui-root>

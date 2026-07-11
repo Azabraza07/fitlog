@@ -1,0 +1,12 @@
+<div class="bar" role="timer" aria-label="Таймер отдыха">
+  <div class="track">
+    <div class="track-fill" [style.transform]="'scaleX(' + (1 - timer.progress()) + ')'"></div>
+  </div>
+  <div class="row">
+    <span class="t-label">Отдых</span>
+    <span class="digits t-num">{{ timer.display() }}</span>
+    <div class="spacer"></div>
+    <button type="button" class="bar-btn" (click)="timer.add(30)">+30</button>
+    <button type="button" class="bar-btn is-acid" (click)="timer.stop()">Пропустить</button>
+  </div>
+</div>

@@ -1,0 +1,145 @@
+<section class="head">
+  <span class="t-label">04 · Питание</span>
+  <h1 class="t-display t-num">{{ macros().kcal }} <small>ккал/день</small></h1>
+  <p class="t-dim t-small">
+    23 года · 176 см · {{ store.currentWeight() }} кг · поддержка ≈ {{ macros().tdee }} ккал −
+    дефицит {{ PROFILE.deficit }}
+  </p>
+</section>
+
+<div class="panel tier-note">
+  <span class="t-label">Текущая ступень</span>
+  <span class="tier-route t-num">{{ store.currentWeight() }} → {{ currentTier().to }} кг</span>
+</div>
+
+<div class="macros">
+  <div class="panel macro">
+    <span class="macro-v t-num">{{ macros().protein }}</span>
+    <span class="t-label">белки, г</span>
+  </div>
+  <div class="panel macro">
+    <span class="macro-v t-num">{{ macros().fat }}</span>
+    <span class="t-label">жиры, г</span>
+  </div>
+  <div class="panel macro">
+    <span class="macro-v t-num">{{ macros().carbs }}</span>
+    <span class="t-label">углеводы, г</span>
+  </div>
+</div>
+
+<p class="t-small t-dim recalc-note">
+  Обнови вес во вкладке «Прогресс» — все цифры пересчитаются автоматически.
+</p>
+
+<!-- ---------- Дневник за сегодня ---------- -->
+<section class="panel block">
+  <span class="t-label">Съедено сегодня</span>
+
+  <div class="diary">
+    @for (row of diaryRows(); track row.label) {
+      <div class="diary-row">
+        <span class="t-label diary-label">{{ row.label }}</span>
+        <div class="diary-track">
+          <div
+            class="diary-fill"
+            [class.is-over]="row.over"
+            [style.transform]="'scaleX(' + row.ratio + ')'"
+          ></div>
+        </div>
+        <span class="t-small t-num diary-nums" [class.is-over]="row.over">
+          {{ row.eaten }} / {{ row.target }}
+        </span>
+      </div>
+    }
+  </div>
+
+  @for (meal of todayMeals(); track meal.id) {
+    <div class="meal">
+      <div class="meal-info">
+        <b>{{ meal.name }}</b>
+        <span class="t-small t-dim t-num">
+          {{ meal.kcal }} ккал · Б {{ meal.protein }} · Ж {{ meal.fat }} · У {{ meal.carbs }}
+        </span>
+      </div>
+      <button type="button" class="meal-del" (click)="deleteMeal(meal.id)" aria-label="Удалить приём пищи">
+        ×
+      </button>
+    </div>
+  }
+
+  @if (formOpen()) {
+    <div class="meal-form">
+      <input
+        class="u-input meal-name"
+        type="text"
+        placeholder="Что съел (необязательно)"
+        [value]="draft().name"
+        (input)="patchDraft('name', $event)"
+      />
+      <div class="meal-grid">
+        <label class="meal-field">
+          <span class="t-label">ккал</span>
+          <input class="u-input" type="number" inputmode="numeric" placeholder="0"
+            [value]="draft().kcal" (input)="patchDraft('kcal', $event)" />
+        </label>
+        <label class="meal-field">
+          <span class="t-label">б</span>
+          <input class="u-input" type="number" inputmode="numeric" placeholder="0"
+            [value]="draft().protein" (input)="patchDraft('protein', $event)" />
+        </label>
+        <label class="meal-field">
+          <span class="t-label">ж</span>
+          <input class="u-input" type="number" inputmode="numeric" placeholder="0"
+            [value]="draft().fat" (input)="patchDraft('fat', $event)" />
+        </label>
+        <label class="meal-field">
+          <span class="t-label">у</span>
+          <input class="u-input" type="number" inputmode="numeric" placeholder="0"
+            [value]="draft().carbs" (input)="patchDraft('carbs', $event)" />
+        </label>
+      </div>
+      <div class="meal-actions">
+        <button type="button" class="tile-btn is-acid" (click)="addMeal()">Добавить</button>
+        <button type="button" class="tile-btn is-quiet" (click)="formOpen.set(false)">Отмена</button>
+      </div>
+    </div>
+  } @else {
+    <button type="button" class="tile-btn is-quiet is-wide add-meal" (click)="formOpen.set(true)">
+      + Записать приём пищи
+    </button>
+  }
+</section>
+
+<!-- ---------- Дорожная карта ---------- -->
+<section class="panel block">
+  <span class="t-label">Дорожная карта до {{ PROFILE.goalWeight }} кг</span>
+
+  <div class="tier-table">
+    <div class="tier-row tier-row--head t-label">
+      <span>вес</span><span>ккал</span><span>б</span><span>ж</span><span>у</span>
+    </div>
+    @for (tier of tiers; track tier.from) {
+      <div class="tier-row t-num" [class.is-current]="isCurrent(tier)">
+        <span>{{ tier.from }}→{{ tier.to }}</span>
+        <span>{{ calc(tier.from).kcal }}</span>
+        <span>{{ calc(tier.from).protein }}</span>
+        <span>{{ calc(tier.from).fat }}</span>
+        <span>{{ calc(tier.from).carbs }}</span>
+      </div>
+    }
+  </div>
+
+  <p class="t-small t-dim">
+    Темп — 0,5–0,8 кг в неделю. Дошёл до 80–85 кг — переходим на поддержку.
+  </p>
+</section>
+
+<!-- ---------- Правила ---------- -->
+<section class="panel block">
+  <span class="t-label">Правила, которые работают</span>
+  <ul class="rules">
+    @for (rule of rules; track rule) {
+      <li>{{ rule }}</li>
+    }
+  </ul>
+</section>

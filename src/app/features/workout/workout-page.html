@@ -1,0 +1,240 @@
+@if (!store.active()) {
+  <!-- ================= Стартовый экран ================= -->
+  <section class="head">
+    <span class="t-label">01 · Сегодня</span>
+    <h1 class="t-display">{{ PROGRAMS[suggested()].name }}</h1>
+    <p class="t-dim t-small">
+      {{ PROGRAMS[suggested()].items.length }} упражнений · 45–55 минут ·
+      тяжело в подходе, но с запасом 1–2 повторения
+    </p>
+  </section>
+
+  <div class="panel plan">
+    @for (item of PROGRAMS[suggested()].items; track item.ex; let i = $index) {
+      <div class="plan-row">
+        <span class="plan-index t-num">{{ i + 1 }}</span>
+        <span class="plan-name">{{ exercise(item.ex).name }}</span>
+        <span class="plan-dose t-num">{{ item.sets }}×{{ item.reps }}</span>
+      </div>
+    }
+  </div>
+
+  <button type="button" class="tile-btn is-acid is-wide" (click)="start(suggested())">
+    Начать тренировку {{ suggested() }}
+  </button>
+  <button type="button" class="tile-btn is-quiet is-wide alt-start" (click)="start(other())">
+    Вместо этого — {{ other() }}
+  </button>
+
+  <section class="warmup">
+    <span class="t-label">Разминка · 8–10 мин</span>
+    <ul>
+      @for (step of WARMUP; track step) {
+        <li>{{ step }}</li>
+      }
+    </ul>
+  </section>
+} @else if (item(); as it) {
+  <!-- ================= Пошаговый режим ================= -->
+  @let a = store.active()!;
+
+  <header class="step-top">
+    <button type="button" class="step-list-btn" (click)="sheet.set({ kind: 'list' })">
+      <span class="t-num">{{ curEx() + 1 }}/{{ a.items.length }}</span>
+      <span class="t-label">упражнения</span>
+    </button>
+    <div class="live t-num">
+      <span>{{ elapsed() }}</span>
+      <span class="live-sep">·</span>
+      <span>{{ tonnage() }} кг</span>
+      <span class="live-sep">·</span>
+      <span>{{ doneSets() }}/{{ totalSets() }}</span>
+    </div>
+    <button
+      type="button"
+      class="pain-btn"
+      [class.is-on]="it.pain"
+      (click)="store.togglePain(curEx())"
+    >
+      боль
+    </button>
+  </header>
+
+  <div class="step-progress">
+    <div class="step-progress-fill" [style.width.%]="totalSets() ? (doneSets() / totalSets()) * 100 : 0"></div>
+  </div>
+
+  <!-- Текущее упражнение -->
+  <section class="focus">
+    <div class="focus-head" (click)="sheet.set({ kind: 'info' })">
+      <span class="mono">{{ monogram(ex()!.name) }}</span>
+      <div class="focus-title">
+        <b>{{ ex()!.name }}</b>
+        <span class="t-small t-dim">
+          {{ ex()!.group }} · план {{ it.plan.sets }}×{{ it.plan.reps }} · техника ⓘ
+        </span>
+      </div>
+    </div>
+
+    @if (suggestionFor(it); as sug) {
+      @if (sug.increased) {
+        <p class="focus-note t-small t-num sug-up">Прогрессия: сегодня {{ sug.w }} кг ↑</p>
+      }
+    }
+    @if (prevHint(it.ex); as hint) {
+      <p class="focus-note t-small t-dim t-num">Прошлый раз · {{ hint }}</p>
+    }
+
+    <!-- Чипы подходов -->
+    <div class="set-chips">
+      @for (s of it.sets; track $index; let si = $index) {
+        <button
+          type="button"
+          class="chip t-num"
+          [class.is-done]="s.done"
+          [class.is-current]="si === curSet() && !s.done"
+          (click)="tapSet(si)"
+        >
+          @if (s.done) {
+            {{ s.w }}×{{ s.r }}
+            @if (s.pr) {
+              <em class="pr">PR</em>
+            }
+          } @else {
+            {{ si + 1 }}
+          }
+        </button>
+      }
+      <button type="button" class="chip chip-add" (click)="addSet()">+</button>
+    </div>
+
+    @if (!exDone()) {
+      <!-- Степперы -->
+      <div class="steppers">
+        @if (!ex()!.isTime) {
+          <div class="stepper">
+            <span class="t-label">вес, кг</span>
+            <div class="stepper-row">
+              <button type="button" class="step-btn" (click)="bumpW(-2.5)">−</button>
+              <span class="step-val t-num">{{ displayW() }}</span>
+              <button type="button" class="step-btn" (click)="bumpW(2.5)">+</button>
+            </div>
+          </div>
+        }
+        <div class="stepper">
+          <span class="t-label">{{ ex()!.isTime ? 'секунды' : 'повторы' }}</span>
+          <div class="stepper-row">
+            <button type="button" class="step-btn" (click)="bumpR(ex()!.isTime ? -5 : -1)">−</button>
+            <span class="step-val t-num">{{ displayR() }}</span>
+            <button type="button" class="step-btn" (click)="bumpR(ex()!.isTime ? 5 : 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="tile-btn is-acid is-wide complete-btn" (click)="completeSet()">
+        Подход {{ curSet() + 1 }} выполнен
+      </button>
+    } @else {
+      <div class="ex-finished">
+        <p class="t-dim">Упражнение сделано ✓</p>
+        @if (!allDone()) {
+          <button type="button" class="tile-btn is-acid is-wide" (click)="advance()">
+            Следующее упражнение →
+          </button>
+        }
+      </div>
+    }
+
+    <div class="focus-actions">
+      <button type="button" class="tile-btn is-quiet" (click)="prev()">←</button>
+      <button type="button" class="tile-btn is-quiet grow" (click)="sheet.set({ kind: 'swap' })">
+        ⇄ Заменить
+      </button>
+      <button type="button" class="tile-btn is-quiet" (click)="next()">→</button>
+    </div>
+  </section>
+
+  @if (allDone()) {
+    <p class="all-done t-small">Все подходы выполнены — можно завершать 💪</p>
+  }
+
+  <button
+    type="button"
+    class="tile-btn is-wide finish-btn"
+    [class.is-acid]="allDone()"
+    [class.is-quiet]="!allDone()"
+    (click)="finish()"
+  >
+    Завершить тренировку
+  </button>
+  <button type="button" class="tile-btn is-danger is-wide cancel-btn" (click)="cancel()">
+    Отменить без сохранения
+  </button>
+}
+
+<!-- ================= Шторки ================= -->
+@if (sheet(); as s) {
+  <app-sheet (closed)="sheet.set(null)">
+    @if (s.kind === 'list' && store.active(); as a) {
+      <span class="t-label">Упражнения сегодня</span>
+      <div class="alts">
+        @for (it of a.items; track $index; let i = $index) {
+          <button type="button" class="alt" (click)="goTo(i)">
+            <span class="mono" [class.mono-dim]="itemDoneCount(it) === it.sets.length">
+              {{ monogram(exercise(it.ex).name) }}
+            </span>
+            <span class="alt-name">
+              <b>{{ exercise(it.ex).name }}</b>
+              <span class="t-small t-dim t-num">
+                {{ itemDoneCount(it) }}/{{ it.sets.length }} подходов
+                @if (it.pain) {
+                  · боль
+                }
+              </span>
+            </span>
+            @if (i === curEx()) {
+              <span class="now-dot" aria-label="текущее"></span>
+            }
+          </button>
+        }
+      </div>
+    } @else if (ex(); as e) {
+      <header class="sheet-head">
+        <span class="mono">{{ monogram(e.name) }}</span>
+        <div class="focus-title">
+          <b>{{ e.name }}</b>
+          <span class="t-small t-dim">{{ e.group }}</span>
+        </div>
+      </header>
+
+      @if (s.kind === 'info') {
+        <span class="t-label">Техника</span>
+        <ul class="tips">
+          @for (tip of e.tips; track tip) {
+            <li>{{ tip }}</li>
+          }
+        </ul>
+        <a class="tile-btn is-wide yt" [href]="ytLink(e.yt)" target="_blank" rel="noopener">
+          Смотреть технику на YouTube ↗
+        </a>
+        <button type="button" class="tile-btn is-quiet is-wide" (click)="sheet.set({ kind: 'swap' })">
+          Нет тренажёра — заменить
+        </button>
+      } @else {
+        <span class="t-label">Замена · та же группа мышц</span>
+        <div class="alts">
+          @for (altId of e.alts; track altId) {
+            <button type="button" class="alt" (click)="swap(altId)">
+              <span class="mono">{{ monogram(exercise(altId).name) }}</span>
+              <span class="alt-name">
+                <b>{{ exercise(altId).name }}</b>
+                <span class="t-small t-dim">{{ exercise(altId).group }}</span>
+              </span>
+              <span class="t-dim">→</span>
+            </button>
+          }
+        </div>
+      }
+    }
+  </app-sheet>
+}
