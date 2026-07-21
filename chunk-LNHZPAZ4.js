@@ -1,0 +1,1 @@
+function k(u,s,c){let t=[],d;return u.forEach((o,r)=>{let n=o.block,e=t.at(-1);e!==void 0&&e.kind==="superset"&&n!==void 0&&n===d&&e.idx.at(-1)===r-1?(e.idx.push(r),e.rounds=Math.max(e.rounds,s[r]??o.sets)):t.push({kind:o.kind??"solo",idx:[r],restSec:o.restSec??c,rounds:s[r]??o.sets}),d=n}),t}export{k as a};
