@@ -175,58 +175,53 @@
   font-weight: 700;
 }
 
-/* ---------- Чипы подходов ---------- */
+/* ---------- Суперсет: пара упражнений одной карточкой ---------- */
 
-.set-chips {
+.block-tag {
+  display: block;
+  color: var(--acid);
+  margin-bottom: 12px;
+}
+
+.super-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 4px;
-}
-
-.chip {
-  appearance: none;
-  min-width: 44px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--dim);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 12px;
+  padding: 10px 0;
+  opacity: 0.45;
+  cursor: pointer;
 
-  &.is-current {
-    border-color: var(--acid);
-    color: var(--ink);
+  & + .super-row {
+    border-top: 1px solid var(--line);
   }
 
-  &.is-done {
-    background: color-mix(in srgb, var(--acid) 16%, transparent);
-    border-color: transparent;
-    color: var(--acid);
+  &.is-now {
+    opacity: 1;
   }
 }
 
-.chip-add {
-  min-width: 40px;
-  font-size: 18px;
-}
-
-.pr {
-  font-style: normal;
-  font-size: 9px;
+.super-mark {
+  flex-shrink: 0;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  color: var(--acid-ink);
-  background: var(--acid);
-  border-radius: 4px;
-  padding: 1px 4px;
+  color: var(--acid);
+  width: 14px;
+}
+
+/* ---------- День отдыха ---------- */
+
+.rest-day {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 16px;
+  margin-bottom: 14px;
+
+  b {
+    font-family: var(--tui-font-heading);
+    font-size: 19px;
+    font-weight: 800;
+  }
 }
 
 /* ---------- Степперы ---------- */
@@ -321,71 +316,9 @@
 
 /* ---------- Шторки ---------- */
 
-.sheet-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.tips {
-  margin: 10px 0 18px;
-  padding-left: 18px;
-  color: var(--dim);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
 .yt {
   display: flex;
   justify-content: center;
   text-decoration: none;
   margin-bottom: 8px;
-}
-
-.alts {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-}
-
-.alt {
-  appearance: none;
-  background: none;
-  border: none;
-  border-top: 1px solid var(--line);
-  padding: 13px 2px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-
-  &:first-child {
-    border-top: none;
-  }
-}
-
-.alt-name {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  b {
-    font-size: 15px;
-  }
-}
-
-.mono-dim {
-  opacity: 0.4;
-}
-
-.now-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--acid);
 }

@@ -11,12 +11,35 @@ export interface Exercise {
   readonly isTime?: boolean;
 }
 
+export type BlockKind = 'solo' | 'superset' | 'cardio';
+
 export interface ProgramItem {
   readonly ex: string;
   readonly sets: number;
   readonly reps: string;
-  /** Последний подход — дроп-сет: −30% веса и до упора */
-  readonly dropSet?: boolean;
+  /**
+   * Индекс блока. Соседние items с одинаковым `block` образуют один суперсет.
+   * Отсутствует у записей до суперсетов — тогда каждый item сам себе блок.
+   */
+  readonly block?: number;
+  /** Тип блока. Отсутствует → 'solo'. */
+  readonly kind?: BlockKind;
+  /** Отдых ПОСЛЕ круга блока, сек. Отсутствует → глобальный restSeconds. 0 → без таймера. */
+  readonly restSec?: number;
+}
+
+/**
+ * Производная структура: не персистится, считается из плоского items[]
+ * функцией toBlocks(). Плоский формат Workout.items менять нельзя —
+ * это формат истории в localStorage.
+ */
+export interface Block {
+  kind: BlockKind;
+  /** Индексы в плоском Workout.items */
+  idx: number[];
+  restSec: number;
+  /** Кругов в блоке = max(sets.length) среди упражнений блока */
+  rounds: number;
 }
 
 export interface ProgramDef {
@@ -63,10 +86,11 @@ export interface WeightEntry {
   kg: number;
 }
 
-export interface Macros {
-  kcal: number;
-  protein: number;
-  fat: number;
-  carbs: number;
-  tdee: number;
+/** Замеры тела, снимаются раз в 2 недели */
+export interface Measurement {
+  date: string;
+  waist?: number;
+  hips?: number;
+  chest?: number;
+  shoulders?: number;
 }

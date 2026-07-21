@@ -61,7 +61,17 @@ export class HistoryPage {
     return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
-  protected setsLine(sets: { w: number | null; r: number | null }[]): string {
+  /**
+   * У упражнений на время в `r` лежат секунды, а не повторы, — печатать их
+   * как «0×900» бессмысленно. Кардио показываем в минутах, планку в секундах.
+   */
+  protected setsLine(exId: string, sets: { w: number | null; r: number | null }[]): string {
+    if (exId === 'cardio-cooldown') {
+      return sets.map((s) => `${Math.round((s.r ?? 0) / 60)} мин`).join('   ');
+    }
+    if (EXERCISES[exId]?.isTime) {
+      return sets.map((s, i) => `${i + 1}) ${s.r ?? 0} с`).join('   ');
+    }
     return sets.map((s, i) => `${i + 1}) ${s.w ?? 0}×${s.r ?? 0}`).join('   ');
   }
 

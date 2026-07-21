@@ -278,42 +278,68 @@ export const EXERCISES: Record<string, Exercise> = {
     tips: ['Тело — прямая линия сбоку', 'По 30–45 секунд на сторону'],
     alts: ['plank', 'dead-bug'],
   },
+
+  // Кардио
+  'cardio-cooldown': {
+    id: 'cardio-cooldown', name: 'Кардио-заминка', group: 'Кардио', isTime: true,
+    yt: 'ходьба в горку на дорожке жиросжигание',
+    tips: [
+      'Дорожка с наклоном 8–12% или велосипед — без ударной нагрузки на колени',
+      'Пульс 120–140: можешь говорить фразами, но не петь',
+      '15–20 минут ровным темпом, без ускорений',
+    ],
+    alts: [],
+  },
 };
 
 /**
- * Философия «минимально достаточной дозы» (12.07.2026, по запросу владельца:
- * после зала должна оставаться энергия жить/работать/учиться):
- * ~17 подходов и 45–55 минут на тренировку, тяжело ВНУТРИ подхода
- * (заканчивать с запасом 1–2 повторения), но без отказа, дроп-сетов
- * и мусорного объёма. На дефиците калорий лишний объём = усталость,
- * а не мышцы. Стало тяжело жить — убрать по подходу с изоляции.
+ * Программа на суперсетах (21.07.2026, по запросу владельца).
+ *
+ * Расписание: вторник / четверг / суббота, чередование A-Б-A / Б-A-Б
+ * (см. schedule.ts). Лимит — 60 минут ВМЕСТЕ с разминкой и кардио-заминкой:
+ * ~8–10 мин разминка + ~28 мин силовая + 15–20 мин кардио.
+ *
+ * Каждая тренировка: одно тяжёлое соло-упражнение на ноги (отдых 2 мин),
+ * затем три суперсета из пар, не конкурирующих за одну мышцу, — это и даёт
+ * экономию времени: пока работает одно упражнение, второе отдыхает.
+ * Отдых берётся ПОСЛЕ пары, внутри пары отдыха нет.
+ *
+ * ОГРАНИЧЕНИЯ ПО ТРАВМАМ: в программе намеренно НЕТ жима лёжа со штангой,
+ * становой тяги и приседаний со штангой. Ни в PROGRAMS, ни в alts не должно
+ * появляться упражнений с осевой нагрузкой на позвоночник — только тренажёры
+ * и гантели.
  */
 export const PROGRAMS: Record<ProgramType, ProgramDef> = {
   A: {
     name: 'Тренировка A',
     items: [
-      { ex: 'leg-press', sets: 3, reps: '8–10' },
-      { ex: 'db-press-neutral', sets: 3, reps: '8–10' },
-      { ex: 'lat-pulldown-neutral', sets: 3, reps: '10–12' },
-      { ex: 'leg-curl-lying', sets: 2, reps: '12' },
-      { ex: 'lateral-raise-db', sets: 2, reps: '12–15' },
-      { ex: 'hammer-curl', sets: 2, reps: '12' },
-      { ex: 'plank', sets: 2, reps: '45–60 с' },
+      { ex: 'leg-press', sets: 2, reps: '8–10', block: 0, kind: 'solo', restSec: 120 },
+      { ex: 'db-press-neutral', sets: 3, reps: '8–10', block: 1, kind: 'superset', restSec: 90 },
+      { ex: 'lat-pulldown-neutral', sets: 3, reps: '10–12', block: 1, kind: 'superset', restSec: 90 },
+      { ex: 'lateral-raise-db', sets: 3, reps: '12–15', block: 2, kind: 'superset', restSec: 75 },
+      { ex: 'leg-curl-lying', sets: 3, reps: '10–12', block: 2, kind: 'superset', restSec: 75 },
+      { ex: 'hammer-curl', sets: 2, reps: '12', block: 3, kind: 'superset', restSec: 60 },
+      { ex: 'plank', sets: 2, reps: '45–60 с', block: 3, kind: 'superset', restSec: 60 },
+      { ex: 'cardio-cooldown', sets: 1, reps: '15–20 мин', block: 4, kind: 'cardio', restSec: 0 },
     ],
   },
   B: {
     name: 'Тренировка B',
     items: [
-      { ex: 'hack-squat', sets: 3, reps: '8–10' },
-      { ex: 'seated-cable-row', sets: 3, reps: '10–12' },
-      { ex: 'db-shoulder-press', sets: 3, reps: '8–10' },
-      { ex: 'hip-thrust', sets: 2, reps: '12' },
-      { ex: 'face-pull', sets: 2, reps: '15' },
-      { ex: 'rope-pushdown', sets: 2, reps: '12' },
-      { ex: 'dead-bug', sets: 2, reps: '10' },
+      { ex: 'hack-squat', sets: 2, reps: '8–10', block: 0, kind: 'solo', restSec: 120 },
+      { ex: 'seated-cable-row', sets: 3, reps: '8–10', block: 1, kind: 'superset', restSec: 90 },
+      { ex: 'db-shoulder-press', sets: 3, reps: '8–10', block: 1, kind: 'superset', restSec: 90 },
+      { ex: 'lateral-raise-db', sets: 3, reps: '12–15', block: 2, kind: 'superset', restSec: 75 },
+      { ex: 'face-pull', sets: 3, reps: '15', block: 2, kind: 'superset', restSec: 75 },
+      { ex: 'rope-pushdown', sets: 2, reps: '12', block: 3, kind: 'superset', restSec: 60 },
+      { ex: 'dead-bug', sets: 2, reps: '10', block: 3, kind: 'superset', restSec: 60 },
+      { ex: 'cardio-cooldown', sets: 1, reps: '15–20 мин', block: 4, kind: 'cardio', restSec: 0 },
     ],
   },
 };
+
+/** Цель по шагам в день — и в тренировочный день, и в день отдыха */
+export const STEPS_GOAL = { min: 8000, max: 10000 } as const;
 
 export const WARMUP: readonly string[] = [
   '5 минут кардио — дорожка или велосипед',

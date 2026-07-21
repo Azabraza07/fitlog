@@ -5,6 +5,8 @@ export class TimerService {
   readonly total = signal(0);
   readonly left = signal(0);
   readonly running = signal(false);
+  /** Подпись на панели таймера: «Отдых» или «Кардио» */
+  readonly label = signal('Отдых');
 
   readonly progress = computed(() => (this.total() ? 1 - this.left() / this.total() : 0));
   readonly display = computed(() => {
@@ -25,8 +27,9 @@ export class TimerService {
     }
   }
 
-  start(seconds: number): void {
+  start(seconds: number, label = 'Отдых'): void {
     this.stopInterval();
+    this.label.set(label);
     this.total.set(seconds);
     this.left.set(seconds);
     this.running.set(true);

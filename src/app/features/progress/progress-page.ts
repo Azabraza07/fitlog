@@ -1,10 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { TuiAxes, TuiLineChart } from '@taiga-ui/addon-charts';
 import type { TuiPoint } from '@taiga-ui/core';
-import { StoreService } from '../../core/store.service';
-import { EXERCISES, PROGRAMS, WARMUP } from '../../core/exercises.data';
-import { PROFILE } from '../../core/nutrition';
-import { Exercise, ProgramType } from '../../core/models';
+import { StoreService, localDate } from '../../core/store.service';
+import { EXERCISES, PROGRAMS, STEPS_GOAL, WARMUP } from '../../core/exercises.data';
+import { KCAL_STEP, PROFILE, WEIGHT_PACE } from '../../core/nutrition';
+import { toBlocks } from '../../core/blocks';
+import { Block, Exercise, ProgramType } from '../../core/models';
+
+interface MeasureRow {
+  label: string;
+  value: number;
+  deltaText: string | null;
+  shrank: boolean;
+}
 
 interface ChartData {
   points: TuiPoint[];
@@ -74,14 +82,50 @@ export class ProgressPage {
 
   protected readonly currentEx = computed(() => this.selectedEx() ?? this.exOptions()[0] ?? null);
 
+  /** График по НЕДЕЛЬНЫМ средним: дневные колебания ±1,5 кг маскируют тренд */
   protected readonly weightChart = computed(() =>
     toChart(
-      this.store.weights().map((x) => ({
+      this.store.weeklyWeights().map((x) => ({
         v: x.kg,
-        label: new Date(x.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+        label: localDate(x.week).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
       })),
     ),
   );
+
+  /** Есть ли запись веса за сегодня — иначе показываем напоминание */
+  protected readonly weighedToday = computed(() =>
+    this.store.weights().some((w) => w.date === this.store.today()),
+  );
+
+  /**
+   * Подсказка по коррекции калорий. Срабатывает только когда темп вышел
+   * за коридор −0,8…−0,5 кг/нед ДВЕ недели подряд — одна неделя может быть
+   * задержкой воды, а не реальным изменением.
+   */
+  protected readonly paceHint = computed<{ text: string; kind: 'fast' | 'slow' | 'ok' } | null>(
+    () => {
+      const deltas = this.store.weeklyDeltas();
+      if (deltas.length < 2) return null;
+      const [prev, last] = deltas.slice(-2);
+      const tooFast = prev < WEIGHT_PACE.fastest && last < WEIGHT_PACE.fastest;
+      const tooSlow = prev > WEIGHT_PACE.slowest && last > WEIGHT_PACE.slowest;
+      if (tooFast) {
+        return {
+          kind: 'fast',
+          text: `Темп быстрее ${-WEIGHT_PACE.fastest} кг/нед две недели подряд — добавь ${KCAL_STEP.min}–${KCAL_STEP.max} ккал, иначе уйдут мышцы.`,
+        };
+      }
+      if (tooSlow) {
+        return {
+          kind: 'slow',
+          text: `Темп медленнее ${-WEIGHT_PACE.slowest} кг/нед две недели подряд — убери ${KCAL_STEP.min}–${KCAL_STEP.max} ккал.`,
+        };
+      }
+      return { kind: 'ok', text: 'Темп в цели: −0,5…−0,8 кг в неделю. Ничего не меняем.' };
+    },
+  );
+
+  protected readonly lastDelta = computed(() => this.store.weeklyDeltas().at(-1) ?? null);
 
   protected readonly exChart = computed(() => {
     const exId = this.currentEx();
@@ -100,6 +144,112 @@ export class ProgressPage {
       .filter((x): x is { v: number; label: string } => x !== null);
     return toChart(values);
   });
+
+  // ---------- Замеры тела ----------
+
+  protected readonly measureFields = [
+    { key: 'waist', label: 'талия' },
+    { key: 'hips', label: 'бёдра' },
+    { key: 'chest', label: 'грудь' },
+    { key: 'shoulders', label: 'плечи' },
+  ] as const;
+
+  /** Незаполненные поля отсутствуют в объекте — отсюда `string | undefined` */
+  protected readonly measureDraft = signal<Record<string, string | undefined>>({});
+  protected readonly measureOpen = signal(false);
+
+  /** Замеры снимаются раз в 2 недели — чаще они тонут в погрешности сантиметра */
+  protected readonly measureDue = computed(() => {
+    const days = this.store.daysSinceMeasurement();
+    return days === null || days >= 14;
+  });
+
+  /** Последние замеры с дельтой к предыдущим */
+  protected readonly measureRows = computed<MeasureRow[]>(() => {
+    const list = this.store.measurements();
+    const last = list.at(-1);
+    if (!last) return [];
+    const prev = list.at(-2);
+    const rows: MeasureRow[] = [];
+    for (const f of this.measureFields) {
+      const value = last[f.key];
+      if (value === undefined) continue;
+      const before = prev?.[f.key];
+      const delta = before === undefined ? null : Math.round((value - before) * 10) / 10;
+      rows.push({
+        label: f.label,
+        value,
+        // Знак важнее числа: «−1.5» читается как прогресс, «1.5» — нет
+        deltaText: delta === null ? null : `${delta > 0 ? '+' : ''}${delta}`,
+        shrank: delta !== null && delta < 0,
+      });
+    }
+    return rows;
+  });
+
+  protected readonly lastMeasureDate = computed(() => {
+    const last = this.store.measurements().at(-1);
+    return last
+      ? localDate(last.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+      : null;
+  });
+
+  protected patchMeasure(key: string, event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.measureDraft.update((d) => ({ ...d, [key]: value }));
+  }
+
+  protected saveMeasurement(): void {
+    const d = this.measureDraft();
+    const num = (s: string | undefined): number | undefined => {
+      const n = parseFloat((s ?? '').replace(',', '.'));
+      return Number.isFinite(n) && n > 0 ? n : undefined;
+    };
+    const m = {
+      waist: num(d['waist']),
+      hips: num(d['hips']),
+      chest: num(d['chest']),
+      shoulders: num(d['shoulders']),
+    };
+    if (!m.waist && !m.hips && !m.chest && !m.shoulders) return;
+    this.store.addMeasurement(m);
+    this.measureDraft.set({});
+    this.measureOpen.set(false);
+  }
+
+  // ---------- Шаги ----------
+
+  protected readonly STEPS_GOAL = STEPS_GOAL;
+  protected readonly stepsInput = signal('');
+
+  protected readonly todaySteps = computed(() => this.store.stepsFor(this.store.today()));
+
+  protected readonly stepsRatio = computed(() =>
+    Math.min(1, this.todaySteps() / STEPS_GOAL.min),
+  );
+
+  protected onStepsInput(event: Event): void {
+    this.stepsInput.set((event.target as HTMLInputElement).value);
+  }
+
+  protected saveSteps(): void {
+    const n = parseInt(this.stepsInput().replace(/\s/g, ''), 10);
+    if (!Number.isFinite(n) || n < 0 || n > 100_000) return;
+    this.store.setSteps(this.store.today(), n);
+    this.stepsInput.set('');
+  }
+
+  // ---------- Программа ----------
+
+  /** Программа, сгруппированная в блоки — чтобы показать суперсеты парами */
+  protected planBlocks(type: ProgramType): Block[] {
+    const items = PROGRAMS[type].items;
+    return toBlocks(items, items.map((p) => p.sets), this.store.restSeconds());
+  }
+
+  protected planItem(type: ProgramType, i: number) {
+    return PROGRAMS[type].items[i];
+  }
 
   protected exercise(id: string): Exercise {
     return EXERCISES[id];

@@ -25,7 +25,13 @@
 
 <!-- ---------- Вес тела ---------- -->
 <section class="panel block">
-  <span class="t-label">Вес тела</span>
+  <span class="t-label">Вес тела · по неделям</span>
+
+  @if (!weighedToday()) {
+    <p class="t-small hint hint--nudge">
+      Взвесься утром натощак — сегодняшней записи ещё нет.
+    </p>
+  }
 
   <div class="weight-form">
     <input
@@ -59,12 +65,114 @@
     </tui-axes>
   } @else {
     <p class="t-small t-dim chart-empty">
-      Записывай вес 2–3 раза в неделю утром натощак — после двух записей появится график.
+      Записывай вес утром натощак — график появится, когда наберутся две недели.
     </p>
+  }
+
+  @if (lastDelta(); as delta) {
+    <p class="t-small t-dim last-line t-num">
+      За последнюю неделю · {{ delta > 0 ? '+' : '' }}{{ delta }} кг
+    </p>
+  }
+
+  @if (paceHint(); as hint) {
+    <p class="t-small hint" [class.hint--warn]="hint.kind !== 'ok'">{{ hint.text }}</p>
   }
 
   @if (lastWeightLine(); as line) {
     <p class="t-small t-dim last-line">Последняя запись · {{ line }}</p>
+  }
+</section>
+
+<!-- ---------- Шаги ---------- -->
+<section class="panel block">
+  <span class="t-label">Шаги сегодня</span>
+
+  <div class="steps-num">
+    <span class="steps-v t-num">{{ todaySteps() }}</span>
+    <span class="t-dim t-num">/ {{ STEPS_GOAL.min }}–{{ STEPS_GOAL.max }}</span>
+  </div>
+
+  <div class="diary-track">
+    <div class="diary-fill" [style.transform]="'scaleX(' + stepsRatio() + ')'"></div>
+  </div>
+
+  <div class="weight-form">
+    <input
+      class="u-input weight-field"
+      type="number"
+      inputmode="numeric"
+      placeholder="Шаги за сегодня"
+      [value]="stepsInput()"
+      (input)="onStepsInput($event)"
+      (keyup.enter)="saveSteps()"
+    />
+    <button type="button" class="tile-btn is-acid" (click)="saveSteps()">Записать</button>
+  </div>
+
+  <p class="t-small t-dim last-line t-num">
+    Среднее за 7 дней · {{ store.stepsAvg7() }} шагов
+  </p>
+</section>
+
+<!-- ---------- Замеры тела ---------- -->
+<section class="panel block">
+  <span class="t-label">Замеры · раз в 2 недели</span>
+
+  @if (measureDue()) {
+    <p class="t-small hint hint--nudge">
+      @if (lastMeasureDate()) {
+        Пора снять замеры — прошло две недели.
+      } @else {
+        Сними первые замеры: вес врёт, а сантиметр показывает состав тела.
+      }
+    </p>
+  }
+
+  @if (measureRows().length) {
+    <div class="measures">
+      @for (row of measureRows(); track row.label) {
+        <div class="measure-row">
+          <span class="t-label">{{ row.label }}</span>
+          <span class="t-num measure-v">{{ row.value }} см</span>
+          @if (row.deltaText; as delta) {
+            <span class="t-num t-small measure-d" [class.is-acid]="row.shrank">{{ delta }}</span>
+          } @else {
+            <span class="t-small t-dim">—</span>
+          }
+        </div>
+      }
+    </div>
+    @if (lastMeasureDate(); as d) {
+      <p class="t-small t-dim last-line">Последние замеры · {{ d }}</p>
+    }
+  }
+
+  @if (measureOpen()) {
+    <div class="measure-grid">
+      @for (f of measureFields; track f.key) {
+        <label class="measure-field">
+          <span class="t-label">{{ f.label }}, см</span>
+          <input
+            class="u-input"
+            type="number"
+            inputmode="decimal"
+            step="0.5"
+            placeholder="0"
+            [value]="measureDraft()[f.key] ?? ''"
+            (input)="patchMeasure(f.key, $event)"
+          />
+        </label>
+      }
+    </div>
+    <div class="measure-actions">
+      <button type="button" class="tile-btn is-acid" (click)="saveMeasurement()">Сохранить</button>
+      <button type="button" class="tile-btn is-quiet" (click)="measureOpen.set(false)">Отмена</button>
+    </div>
+  } @else {
+    <button type="button" class="tile-btn is-quiet is-wide add-measure" (click)="measureOpen.set(true)">
+      + Записать замеры
+    </button>
   }
 </section>
 
@@ -106,10 +214,13 @@
 <!-- ---------- Программа и настройки ---------- -->
 <section class="panel block">
   <span class="t-label">Моя программа</span>
-  <p class="t-small t-dim block-note">Full Body 3×/нед · ротация A/B · +2,5 кг, когда все подходы чистые и без боли</p>
+  <p class="t-small t-dim block-note">
+    Суперсеты · вторник / четверг / суббота · ротация A-Б-A / Б-A-Б ·
+    +2,5 кг (+5 на жиме ногами и гакке), когда все подходы закрыты по верху вилки
+  </p>
 
   <div class="rest-row">
-    <span class="t-small">Отдых между подходами</span>
+    <span class="t-small">Отдых по умолчанию</span>
     <div class="rest-btns">
       @for (s of restOptions; track s) {
         <button
@@ -124,6 +235,11 @@
       }
     </div>
   </div>
+
+  <p class="t-small t-dim block-note">
+    В программе A/B отдых задан по блокам: 120 / 90 / 75 / 60 с. Эта настройка —
+    запасной вариант для старых незавершённых тренировок.
+  </p>
 
   <button type="button" class="tile-btn is-quiet is-wide" (click)="programOpen.set(!programOpen())">
     {{ programOpen() ? 'Скрыть программу A/B' : 'Показать программу A/B' }}
@@ -143,12 +259,24 @@
     <div class="program">
       @for (type of programTypes; track type) {
         <span class="t-label prog-title">{{ PROGRAMS[type].name }}</span>
-        @for (item of PROGRAMS[type].items; track item.ex; let i = $index) {
-          <div class="prog-row">
-            <span class="t-num prog-i">{{ i + 1 }}</span>
-            <span class="prog-name">{{ exercise(item.ex).name }}</span>
-            <span class="t-num t-small t-dim">{{ item.sets }}×{{ item.reps }}</span>
-          </div>
+        @for (b of planBlocks(type); track $index; let bi = $index) {
+          @if (b.kind === 'superset') {
+            <div class="prog-row">
+              <span class="t-num prog-i">{{ bi + 1 }}</span>
+              <span class="prog-name is-acid t-label">Суперсет</span>
+              <span class="t-num t-small t-dim">отдых {{ b.restSec }} с</span>
+            </div>
+          }
+          @for (i of b.idx; track i) {
+            @let p = planItem(type, i);
+            <div class="prog-row">
+              <span class="t-num prog-i">{{ b.kind === 'superset' ? '↳' : bi + 1 }}</span>
+              <span class="prog-name">{{ exercise(p.ex).name }}</span>
+              <span class="t-num t-small t-dim">
+                {{ b.kind === 'cardio' ? p.reps : p.sets + '×' + p.reps }}
+              </span>
+            </div>
+          }
         }
       }
       <span class="t-label prog-title">Разминка</span>

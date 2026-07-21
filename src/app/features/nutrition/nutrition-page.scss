@@ -11,24 +11,49 @@
   }
 }
 
-.tier-note {
+/* ---------- Белок: главная карточка дня ---------- */
+
+.protein-card {
+  padding: 18px 16px;
+  margin-bottom: 14px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 10px;
+
+  &.is-hit {
+    border-color: var(--acid);
+  }
 }
 
-.tier-route {
+.protein-num {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.protein-v {
   font-family: var(--tui-font-heading);
+  font-size: 40px;
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--acid);
+}
+
+.kcal-status {
+  margin: -4px 0 0;
+  text-align: right;
+
+  &.is-over {
+    color: var(--coral);
+  }
 }
 
 .macros {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+  margin-top: 4px;
 }
 
 .macro {
@@ -44,40 +69,9 @@
   font-weight: 800;
 }
 
-.recalc-note {
-  margin: 12px 2px 16px;
-}
-
 .block {
   padding: 16px;
   margin-bottom: 14px;
-}
-
-.tier-table {
-  margin: 14px 0 12px;
-}
-
-.tier-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 0.7fr 0.7fr 0.7fr;
-  gap: 6px;
-  padding: 10px 2px;
-  border-bottom: 1px solid var(--line);
-  font-weight: 600;
-  font-size: 14px;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &.is-current {
-    color: var(--acid);
-  }
-}
-
-.tier-row--head {
-  font-weight: 600;
-  border-bottom: 1px solid var(--line);
 }
 
 /* ---------- Дневник ---------- */

@@ -1,25 +1,70 @@
 @if (!store.active()) {
   <!-- ================= Стартовый экран ================= -->
-  <section class="head">
-    <span class="t-label">01 · Сегодня</span>
-    <h1 class="t-display">{{ PROGRAMS[suggested()].name }}</h1>
-    <p class="t-dim t-small">
-      {{ PROGRAMS[suggested()].items.length }} упражнений · 45–55 минут ·
-      тяжело в подходе, но с запасом 1–2 повторения
-    </p>
-  </section>
+  @if (isTrainingToday()) {
+    <section class="head">
+      <span class="t-label">01 · Сегодня по расписанию</span>
+      <h1 class="t-display">{{ PROGRAMS[suggested()].name }}</h1>
+      <p class="t-dim t-small">
+        Суперсеты · ≈60 минут вместе с разминкой и кардио-заминкой
+      </p>
+    </section>
+  } @else {
+    <section class="head">
+      <span class="t-label">01 · Сегодня</span>
+      <h1 class="t-display">День отдыха</h1>
+      <p class="t-dim t-small">Тренировки — вторник, четверг, суббота</p>
+    </section>
+
+    <div class="panel rest-day">
+      <span class="t-label">Следующая тренировка</span>
+      <b>{{ PROGRAMS[upcoming().type].name }}</b>
+      <span class="t-small t-dim">{{ upcoming().when }}</span>
+    </div>
+
+    <div class="panel rest-day">
+      <span class="t-label">Шаги сегодня</span>
+      <b class="t-num">{{ todaySteps() }}</b>
+      <span class="t-small t-dim">
+        Цель {{ STEPS_GOAL.min / 1000 }}–{{ STEPS_GOAL.max / 1000 }} тыс. шагов —
+        ходьба в дни отдыха держит дефицит без ущерба восстановлению
+      </span>
+    </div>
+  }
 
   <div class="panel plan">
-    @for (item of PROGRAMS[suggested()].items; track item.ex; let i = $index) {
-      <div class="plan-row">
-        <span class="plan-index t-num">{{ i + 1 }}</span>
-        <span class="plan-name">{{ exercise(item.ex).name }}</span>
-        <span class="plan-dose t-num">{{ item.sets }}×{{ item.reps }}</span>
-      </div>
+    @for (b of planBlocks(suggested()); track $index; let bi = $index) {
+      @if (b.kind === 'superset') {
+        <div class="plan-row">
+          <span class="plan-index t-num">{{ bi + 1 }}</span>
+          <span class="plan-name block-tag t-label">Суперсет</span>
+          <span class="plan-dose t-num">отдых {{ b.restSec }} с</span>
+        </div>
+      }
+      @for (i of b.idx; track i) {
+        @let p = planItem(suggested(), i);
+        <div class="plan-row">
+          <span class="plan-index t-num">
+            @if (b.kind === 'superset') {
+              ↳
+            } @else {
+              {{ bi + 1 }}
+            }
+          </span>
+          <span class="plan-name">{{ exercise(p.ex).name }}</span>
+          <span class="plan-dose t-num">
+            @if (b.kind === 'cardio') {
+              {{ p.reps }}
+            } @else {
+              {{ p.sets }}×{{ p.reps }}
+            }
+          </span>
+        </div>
+      }
     }
   </div>
 
-  <button type="button" class="tile-btn is-acid is-wide" (click)="start(suggested())">
+  <button type="button" class="tile-btn is-wide" [class.is-acid]="isTrainingToday()"
+          [class.is-quiet]="!isTrainingToday()" (click)="start(suggested())">
     Начать тренировку {{ suggested() }}
   </button>
   <button type="button" class="tile-btn is-quiet is-wide alt-start" (click)="start(other())">
@@ -34,14 +79,14 @@
       }
     </ul>
   </section>
-} @else if (item(); as it) {
+} @else if (block(); as b) {
   <!-- ================= Пошаговый режим ================= -->
-  @let a = store.active()!;
+  @let it = item()!;
 
   <header class="step-top">
     <button type="button" class="step-list-btn" (click)="sheet.set({ kind: 'list' })">
-      <span class="t-num">{{ curEx() + 1 }}/{{ a.items.length }}</span>
-      <span class="t-label">упражнения</span>
+      <span class="t-num">{{ curBlock() + 1 }}/{{ blocks().length }}</span>
+      <span class="t-label">блоки</span>
     </button>
     <div class="live t-num">
       <span>{{ elapsed() }}</span>
@@ -64,17 +109,40 @@
     <div class="step-progress-fill" [style.width.%]="totalSets() ? (doneSets() / totalSets()) * 100 : 0"></div>
   </div>
 
-  <!-- Текущее упражнение -->
+  <!-- Текущий блок -->
   <section class="focus">
-    <div class="focus-head" (click)="sheet.set({ kind: 'info' })">
-      <span class="mono">{{ monogram(ex()!.name) }}</span>
-      <div class="focus-title">
-        <b>{{ ex()!.name }}</b>
-        <span class="t-small t-dim">
-          {{ ex()!.group }} · план {{ it.plan.sets }}×{{ it.plan.reps }} · техника ⓘ
-        </span>
+    @if (isSuperset()) {
+      <span class="t-label block-tag">Суперсет · между упражнениями отдыха нет</span>
+
+      @for (i of b.idx; track i; let pos = $index) {
+        @let bi = itemAt(i)!;
+        <div class="super-row" [class.is-now]="pos === curPos()"
+             (click)="sheet.set({ kind: 'info', exId: bi.ex })">
+          <span class="super-mark">{{ pos === curPos() ? '▶' : '' }}</span>
+          <span class="mono">{{ monogram(exercise(bi.ex).name) }}</span>
+          <div class="focus-title">
+            <b>{{ exercise(bi.ex).name }}</b>
+            <span class="t-small t-dim">
+              {{ exercise(bi.ex).group }} · план {{ bi.plan.sets }}×{{ bi.plan.reps }} · ⓘ
+            </span>
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="focus-head" (click)="sheet.set({ kind: 'info', exId: it.ex })">
+        <span class="mono">{{ monogram(ex()!.name) }}</span>
+        <div class="focus-title">
+          <b>{{ ex()!.name }}</b>
+          <span class="t-small t-dim">
+            @if (isCardio()) {
+              {{ it.plan.reps }} · пульс 120–140 · техника ⓘ
+            } @else {
+              {{ ex()!.group }} · план {{ it.plan.sets }}×{{ it.plan.reps }} · техника ⓘ
+            }
+          </span>
+        </div>
       </div>
-    </div>
+    }
 
     @if (suggestionFor(it); as sug) {
       @if (sug.increased) {
@@ -85,30 +153,28 @@
       <p class="focus-note t-small t-dim t-num">Прошлый раз · {{ hint }}</p>
     }
 
-    <!-- Чипы подходов -->
-    <div class="set-chips">
-      @for (s of it.sets; track $index; let si = $index) {
-        <button
-          type="button"
-          class="chip t-num"
-          [class.is-done]="s.done"
-          [class.is-current]="si === curSet() && !s.done"
-          (click)="tapSet(si)"
-        >
-          @if (s.done) {
-            {{ s.w }}×{{ s.r }}
-            @if (s.pr) {
-              <em class="pr">PR</em>
+    <!-- Чипы кругов -->
+    @if (!isCardio()) {
+      <div class="set-chips">
+        @for (r of roundIndexes(); track r) {
+          <button
+            type="button"
+            class="chip t-num"
+            [class.is-done]="roundDone(r)"
+            [class.is-current]="r === curRound() && !roundDone(r)"
+            (click)="tapSet(r)"
+          >
+            {{ r + 1 }}
+            @if (isSuperset() && roundDone(r)) {
+              <em class="pr">×2</em>
             }
-          } @else {
-            {{ si + 1 }}
-          }
-        </button>
-      }
-      <button type="button" class="chip chip-add" (click)="addSet()">+</button>
-    </div>
+          </button>
+        }
+        <button type="button" class="chip chip-add" (click)="addRound()">+</button>
+      </div>
+    }
 
-    @if (!exDone()) {
+    @if (!blockDone()) {
       <!-- Степперы -->
       <div class="steppers">
         @if (!ex()!.isTime) {
@@ -122,24 +188,53 @@
           </div>
         }
         <div class="stepper">
-          <span class="t-label">{{ ex()!.isTime ? 'секунды' : 'повторы' }}</span>
+          <span class="t-label">
+            @if (isCardio()) {
+              минуты
+            } @else if (ex()!.isTime) {
+              секунды
+            } @else {
+              повторы
+            }
+          </span>
           <div class="stepper-row">
-            <button type="button" class="step-btn" (click)="bumpR(ex()!.isTime ? -5 : -1)">−</button>
-            <span class="step-val t-num">{{ displayR() }}</span>
-            <button type="button" class="step-btn" (click)="bumpR(ex()!.isTime ? 5 : 1)">+</button>
+            <button type="button" class="step-btn" (click)="bumpR(repStep(-1))">−</button>
+            <span class="step-val t-num">{{ isCardio() ? displayMin() : displayR() }}</span>
+            <button type="button" class="step-btn" (click)="bumpR(repStep(1))">+</button>
           </div>
         </div>
       </div>
 
-      <button type="button" class="tile-btn is-acid is-wide complete-btn" (click)="completeSet()">
-        Подход {{ curSet() + 1 }} выполнен
-      </button>
+      @if (isCardio()) {
+        <button type="button" class="tile-btn is-quiet is-wide" (click)="startCardio()">
+          Запустить {{ displayMin() }} мин
+        </button>
+        <button type="button" class="tile-btn is-acid is-wide complete-btn" (click)="completeSet()">
+          Кардио сделано ✓
+        </button>
+      } @else {
+        <button type="button" class="tile-btn is-acid is-wide complete-btn" (click)="completeSet()">
+          @if (isSuperset()) {
+            Круг {{ curRound() + 1 }} · {{ ex()!.name }} ✓
+          } @else {
+            Подход {{ curRound() + 1 }} выполнен
+          }
+        </button>
+      }
     } @else {
       <div class="ex-finished">
-        <p class="t-dim">Упражнение сделано ✓</p>
+        <p class="t-dim">
+          @if (isCardio()) {
+            Заминка сделана ✓
+          } @else if (isSuperset()) {
+            Суперсет сделан ✓
+          } @else {
+            Упражнение сделано ✓
+          }
+        </p>
         @if (!allDone()) {
           <button type="button" class="tile-btn is-acid is-wide" (click)="advance()">
-            Следующее упражнение →
+            Дальше →
           </button>
         }
       </div>
@@ -147,15 +242,18 @@
 
     <div class="focus-actions">
       <button type="button" class="tile-btn is-quiet" (click)="prev()">←</button>
-      <button type="button" class="tile-btn is-quiet grow" (click)="sheet.set({ kind: 'swap' })">
-        ⇄ Заменить
-      </button>
+      @if (ex()!.alts.length) {
+        <button type="button" class="tile-btn is-quiet grow"
+                (click)="sheet.set({ kind: 'swap', exId: it.ex })">
+          ⇄ Заменить
+        </button>
+      }
       <button type="button" class="tile-btn is-quiet" (click)="next()">→</button>
     </div>
   </section>
 
   @if (allDone()) {
-    <p class="all-done t-small">Все подходы выполнены — можно завершать 💪</p>
+    <p class="all-done t-small">Всё выполнено — можно завершать 💪</p>
   }
 
   <button
@@ -175,30 +273,42 @@
 <!-- ================= Шторки ================= -->
 @if (sheet(); as s) {
   <app-sheet (closed)="sheet.set(null)">
-    @if (s.kind === 'list' && store.active(); as a) {
-      <span class="t-label">Упражнения сегодня</span>
+    @if (s.kind === 'list') {
+      <span class="t-label">Блоки сегодня</span>
       <div class="alts">
-        @for (it of a.items; track $index; let i = $index) {
+        @for (b of blocks(); track $index; let i = $index) {
           <button type="button" class="alt" (click)="goTo(i)">
-            <span class="mono" [class.mono-dim]="itemDoneCount(it) === it.sets.length">
-              {{ monogram(exercise(it.ex).name) }}
+            <span class="mono" [class.mono-dim]="blockDoneRounds(b) === b.rounds">
+              @if (b.kind === 'superset') {
+                СС
+              } @else if (b.kind === 'cardio') {
+                КА
+              } @else {
+                {{ monogram(exercise(itemAt(b.idx[0])!.ex).name) }}
+              }
             </span>
             <span class="alt-name">
-              <b>{{ exercise(it.ex).name }}</b>
+              <b>{{ blockTitle(b) }}</b>
               <span class="t-small t-dim t-num">
-                {{ itemDoneCount(it) }}/{{ it.sets.length }} подходов
-                @if (it.pain) {
+                {{ blockDoneRounds(b) }}/{{ b.rounds }}
+                @if (b.kind === 'superset') {
+                  кругов
+                } @else {
+                  подходов
+                }
+                @if (blockHasPain(b)) {
                   · боль
                 }
               </span>
             </span>
-            @if (i === curEx()) {
-              <span class="now-dot" aria-label="текущее"></span>
+            @if (i === curBlock()) {
+              <span class="now-dot" aria-label="текущий"></span>
             }
           </button>
         }
       </div>
-    } @else if (ex(); as e) {
+    } @else {
+      @let e = exercise(s.exId);
       <header class="sheet-head">
         <span class="mono">{{ monogram(e.name) }}</span>
         <div class="focus-title">
@@ -217,14 +327,17 @@
         <a class="tile-btn is-wide yt" [href]="ytLink(e.yt)" target="_blank" rel="noopener">
           Смотреть технику на YouTube ↗
         </a>
-        <button type="button" class="tile-btn is-quiet is-wide" (click)="sheet.set({ kind: 'swap' })">
-          Нет тренажёра — заменить
-        </button>
+        @if (e.alts.length) {
+          <button type="button" class="tile-btn is-quiet is-wide"
+                  (click)="sheet.set({ kind: 'swap', exId: s.exId })">
+            Нет тренажёра — заменить
+          </button>
+        }
       } @else {
-        <span class="t-label">Замена · та же группа мышц</span>
+        <span class="t-label">Замена · та же группа, без осевой нагрузки</span>
         <div class="alts">
           @for (altId of e.alts; track altId) {
-            <button type="button" class="alt" (click)="swap(altId)">
+            <button type="button" class="alt" (click)="swap(altId, s.exId)">
               <span class="mono">{{ monogram(exercise(altId).name) }}</span>
               <span class="alt-name">
                 <b>{{ exercise(altId).name }}</b>

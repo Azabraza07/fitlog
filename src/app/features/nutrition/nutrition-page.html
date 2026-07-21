@@ -1,56 +1,61 @@
 <section class="head">
   <span class="t-label">04 · Питание</span>
-  <h1 class="t-display t-num">{{ macros().kcal }} <small>ккал/день</small></h1>
+  <h1 class="t-display t-num">{{ GOALS.kcalMin }}–{{ GOALS.kcalMax }} <small>ккал/день</small></h1>
   <p class="t-dim t-small">
-    23 года · 176 см · {{ store.currentWeight() }} кг · поддержка ≈ {{ macros().tdee }} ккал −
-    дефицит {{ PROFILE.deficit }}
+    Дефицит · белок {{ GOALS.proteinMin }}–{{ GOALS.proteinMax }} г — главный приоритет
   </p>
 </section>
 
-<div class="panel tier-note">
-  <span class="t-label">Текущая ступень</span>
-  <span class="tier-route t-num">{{ store.currentWeight() }} → {{ currentTier().to }} кг</span>
-</div>
-
-<div class="macros">
-  <div class="panel macro">
-    <span class="macro-v t-num">{{ macros().protein }}</span>
-    <span class="t-label">белки, г</span>
+<!-- ---------- Белок: главная цель дня ---------- -->
+<section class="panel protein-card" [class.is-hit]="protein().hit">
+  <span class="t-label">Белок сегодня · приоритет №1</span>
+  <div class="protein-num">
+    <span class="protein-v t-num">{{ protein().eaten }}</span>
+    <span class="t-dim t-num">/ {{ GOALS.proteinMin }} г</span>
   </div>
-  <div class="panel macro">
-    <span class="macro-v t-num">{{ macros().fat }}</span>
-    <span class="t-label">жиры, г</span>
+  <div class="diary-track">
+    <div class="diary-fill" [style.transform]="'scaleX(' + protein().ratio + ')'"></div>
   </div>
-  <div class="panel macro">
-    <span class="macro-v t-num">{{ macros().carbs }}</span>
-    <span class="t-label">углеводы, г</span>
-  </div>
-</div>
-
-<p class="t-small t-dim recalc-note">
-  Обнови вес во вкладке «Прогресс» — все цифры пересчитаются автоматически.
-</p>
+  <span class="t-small" [class.t-dim]="!protein().hit">
+    @if (protein().hit) {
+      Норма закрыта ✓ — мышцы под защитой
+    } @else {
+      Осталось {{ protein().left }} г — это примерно {{ (protein().left / 35).toFixed(0) }} порции
+      курицы / творога
+    }
+  </span>
+</section>
 
 <!-- ---------- Дневник за сегодня ---------- -->
 <section class="panel block">
   <span class="t-label">Съедено сегодня</span>
 
   <div class="diary">
-    @for (row of diaryRows(); track row.label) {
-      <div class="diary-row">
-        <span class="t-label diary-label">{{ row.label }}</span>
-        <div class="diary-track">
-          <div
-            class="diary-fill"
-            [class.is-over]="row.over"
-            [style.transform]="'scaleX(' + row.ratio + ')'"
-          ></div>
-        </div>
-        <span class="t-small t-num diary-nums" [class.is-over]="row.over">
-          {{ row.eaten }} / {{ row.target }}
-        </span>
+    <div class="diary-row">
+      <span class="t-label diary-label">ккал</span>
+      <div class="diary-track">
+        <div
+          class="diary-fill"
+          [class.is-over]="kcal().over"
+          [style.transform]="'scaleX(' + kcal().ratio + ')'"
+        ></div>
       </div>
-    }
+      <span class="t-small t-num diary-nums" [class.is-over]="kcal().over">
+        {{ kcal().eaten }} / {{ GOALS.kcalMin }}–{{ GOALS.kcalMax }}
+      </span>
+    </div>
+    <p class="t-small kcal-status" [class.is-over]="kcal().over" [class.t-dim]="!kcal().over">
+      {{ kcal().status }}
+    </p>
+
+    <div class="macros">
+      @for (row of secondary(); track row.label) {
+        <div class="panel macro">
+          <span class="macro-v t-num">{{ row.value }}</span>
+          <span class="t-label">{{ row.label }}</span>
+        </div>
+      }
+    </div>
   </div>
 
   @for (meal of todayMeals(); track meal.id) {
@@ -108,30 +113,6 @@
       + Записать приём пищи
     </button>
   }
-</section>
-
-<!-- ---------- Дорожная карта ---------- -->
-<section class="panel block">
-  <span class="t-label">Дорожная карта до {{ PROFILE.goalWeight }} кг</span>
-
-  <div class="tier-table">
-    <div class="tier-row tier-row--head t-label">
-      <span>вес</span><span>ккал</span><span>б</span><span>ж</span><span>у</span>
-    </div>
-    @for (tier of tiers; track tier.from) {
-      <div class="tier-row t-num" [class.is-current]="isCurrent(tier)">
-        <span>{{ tier.from }}→{{ tier.to }}</span>
-        <span>{{ calc(tier.from).kcal }}</span>
-        <span>{{ calc(tier.from).protein }}</span>
-        <span>{{ calc(tier.from).fat }}</span>
-        <span>{{ calc(tier.from).carbs }}</span>
-      </div>
-    }
-  </div>
-
-  <p class="t-small t-dim">
-    Темп — 0,5–0,8 кг в неделю. Дошёл до 80–85 кг — переходим на поддержку.
-  </p>
 </section>
 
 <!-- ---------- Правила ---------- -->

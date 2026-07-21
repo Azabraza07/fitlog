@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { StoreService, todayISO } from '../../core/store.service';
-import { NUTRITION_TIERS, PROFILE, calcNutrition } from '../../core/nutrition';
+import { StoreService } from '../../core/store.service';
+import { NUTRITION_GOALS, PROFILE } from '../../core/nutrition';
 
 interface MealDraft {
   name: string;
@@ -20,23 +20,16 @@ const EMPTY_DRAFT: MealDraft = { name: '', kcal: '', protein: '', fat: '', carbs
 export class NutritionPage {
   protected readonly store = inject(StoreService);
   protected readonly PROFILE = PROFILE;
-  protected readonly tiers = NUTRITION_TIERS;
-  protected readonly calc = calcNutrition;
-  protected readonly today = todayISO();
+  protected readonly GOALS = NUTRITION_GOALS;
 
-  protected readonly macros = computed(() => calcNutrition(this.store.currentWeight()));
-
-  protected readonly currentTier = computed(() => {
-    const w = this.store.currentWeight();
-    return this.tiers.find((t) => w > t.to) ?? this.tiers[this.tiers.length - 1];
-  });
+  protected readonly today = this.store.today;
 
   // ---------- Дневник за сегодня ----------
 
   protected readonly draft = signal<MealDraft>({ ...EMPTY_DRAFT });
   protected readonly formOpen = signal(false);
 
-  protected readonly todayMeals = computed(() => this.store.meals()[this.today] ?? []);
+  protected readonly todayMeals = computed(() => this.store.meals()[this.today()] ?? []);
 
   protected readonly eaten = computed(() =>
     this.todayMeals().reduce(
@@ -50,24 +43,43 @@ export class NutritionPage {
     ),
   );
 
-  protected readonly diaryRows = computed(() => {
-    const target = this.macros();
-    const eaten = this.eaten();
-    return [
-      { label: 'ккал', eaten: eaten.kcal, target: target.kcal },
-      { label: 'белки', eaten: eaten.protein, target: target.protein },
-      { label: 'жиры', eaten: eaten.fat, target: target.fat },
-      { label: 'углеводы', eaten: eaten.carbs, target: target.carbs },
-    ].map((row) => ({
-      ...row,
-      ratio: Math.min(1, row.target ? row.eaten / row.target : 0),
-      over: row.eaten > row.target,
-    }));
+  // ---------- Белок: главный приоритет ----------
+
+  protected readonly protein = computed(() => {
+    const eaten = this.eaten().protein;
+    const { proteinMin, proteinMax } = NUTRITION_GOALS;
+    return {
+      eaten,
+      ratio: Math.min(1, eaten / proteinMin),
+      /** Норма закрыта — цель по белку это МИНИМУМ, перебор не страшен */
+      hit: eaten >= proteinMin,
+      left: Math.max(0, Math.round(proteinMin - eaten)),
+      inRange: eaten >= proteinMin && eaten <= proteinMax,
+    };
   });
 
-  protected isCurrent(tier: { from: number; to: number }): boolean {
-    return tier === this.currentTier();
-  }
+  // ---------- Калории: коридор 2200–2400 ----------
+
+  protected readonly kcal = computed(() => {
+    const eaten = this.eaten().kcal;
+    const { kcalMin, kcalMax } = NUTRITION_GOALS;
+    return {
+      eaten,
+      ratio: Math.min(1, eaten / kcalMax),
+      over: eaten > kcalMax,
+      under: eaten < kcalMin,
+      status: eaten > kcalMax ? 'перебор' : eaten < kcalMin ? 'ниже коридора' : 'в цели',
+    };
+  });
+
+  /** Жиры и углеводы — справочно, жёстких целей по ним нет */
+  protected readonly secondary = computed(() => {
+    const e = this.eaten();
+    return [
+      { label: 'жиры, г', value: Math.round(e.fat) },
+      { label: 'углеводы, г', value: Math.round(e.carbs) },
+    ];
+  });
 
   protected patchDraft(field: keyof MealDraft, event: Event): void {
     const value = (event.target as HTMLInputElement).value;
@@ -85,21 +97,21 @@ export class NutritionPage {
       carbs: num(d.carbs),
     };
     if (!meal.kcal && !meal.protein && !meal.fat && !meal.carbs) return;
-    this.store.addMeal(this.today, meal);
+    this.store.addMeal(this.today(), meal);
     this.draft.set({ ...EMPTY_DRAFT });
     this.formOpen.set(false);
   }
 
   protected deleteMeal(id: number): void {
-    this.store.deleteMeal(this.today, id);
+    this.store.deleteMeal(this.today(), id);
   }
 
   protected readonly rules = [
-    'Белок — святое: сохраняет мышцы на дефиците. Курица, рыба, яйца, творог, протеин.',
-    'Взвешивайся 2–3 раза в неделю утром натощак; смотри на среднее за неделю, а не на день.',
-    'Вес стоит 2+ недели — минус 100–150 ккал от текущей нормы.',
+    'Белок — приоритет №1: на дефиците он удерживает мышцы. 160 г — это минимум, а не «примерно».',
+    'Набирай белок по 30–40 г за приём: курица, рыба, яйца, творог, протеин.',
+    'Взвешивайся утром натощак; смотри на среднее за неделю, а не на отдельный день.',
+    'Темп быстрее 0,8 кг в неделю — добавь 150–200 ккал: на такой скорости уходят мышцы.',
     '8–10 тысяч шагов в день ускоряют жиросжигание без ущерба восстановлению.',
-    'Вода — 2,5–3 литра в день.',
-    'Сон 7–9 часов: недосып = голод и слабые тренировки.',
+    'Вода — 2,5–3 литра в день. Сон 7–9 часов: недосып = голод и слабые тренировки.',
   ] as const;
 }

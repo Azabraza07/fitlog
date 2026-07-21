@@ -185,6 +185,124 @@ body {
   font-weight: 500;
 }
 
+/* ---------- Чипы подходов / кругов ---------- */
+
+.set-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.chip {
+  appearance: none;
+  min-width: 44px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--dim);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chip.is-current {
+  border-color: var(--acid);
+  color: var(--ink);
+}
+
+.chip.is-done {
+  background: color-mix(in srgb, var(--acid) 16%, transparent);
+  border-color: transparent;
+  color: var(--acid);
+}
+
+.chip-add {
+  min-width: 40px;
+  font-size: 18px;
+}
+
+.pr {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--acid-ink);
+  background: var(--acid);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+/* ---------- Списки упражнений в шторках ---------- */
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tips {
+  margin: 10px 0 18px;
+  padding-left: 18px;
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.alts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.alt {
+  appearance: none;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--line);
+  padding: 13px 2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.alt:first-child {
+  border-top: none;
+}
+
+.alt-name {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alt-name b {
+  font-size: 15px;
+}
+
+.mono-dim {
+  opacity: 0.4;
+}
+
+.now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acid);
+}
+
 /* Taiga tui-root не должен красить фон поверх нашего */
 tui-root {
   background: var(--bg);
